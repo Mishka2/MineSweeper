@@ -207,7 +207,7 @@ class Board():
             self.board_win = True
 
         if self.display_rules:
-            print(' ')
+            # print(' ')
             print(Fore.GREEN + "Flag the " + Style.BRIGHT + Fore.RED +
                 str(len(self.bombs)) + Style.RESET_ALL + Fore.GREEN + " bombs with 'space'!")
 
@@ -418,7 +418,7 @@ class MineGame():
 
     def check_win(self):
         self.win = self.board.get_board_win()
-        print(self.win)
+        # print(self.win)
 
     def check_cursor_movement(self):
         arrows = ["up", "down", "left", "right", "r"]
@@ -459,25 +459,24 @@ class MineGame():
             self.clear_surrounding_squares(coor, 0)
 
     def clear_surrounding_squares(self, coor, num_numbers):
+        current_coordinate = self.board.board[coor[0]][coor[1]]
 
-        if(self.board.board[coor[0]][coor[1]].get_name() == 'empty' or
-            (self.board.board[coor[0]][coor[1]].get_name() == 'number' and
+        if(current_coordinate.get_name() == 'empty' or
+            (current_coordinate.get_name() == 'number' and
             num_numbers == 0)):
 
-            self.board.board[coor[0]][coor[1]].set_display_name()
-            self.board.board[coor[0]][coor[1]].set_hidden_state(False)
+            current_coordinate.set_display_name()
+            current_coordinate.set_hidden_state(False)
 
-            if(self.board.board[coor[0]][coor[1]].get_name() == 'number'):
+            if(current_coordinate.get_name() == 'number'):
                 num_numbers += 1
-            if(self.board.board[coor[0]][coor[1]].get_name() == 'empty'):
+            if(current_coordinate.get_name() == 'empty'):
                 num_numbers = 0
-            # print("times: " + str(self.recursion))
 
-            ###CHECKING TOP BOTTOM LEFT RIGHT
+            ###CHECKING TOP, BOTTOM, LEFT, and RIGHT
 
-            #check middle top
-            if(coor[0]-1 in self.board.get_x_dim() and
-                coor[1] in self.board.get_y_dim() and
+            #check top
+            if(coor[0]-1 in self.board.get_x_dim() and coor[1] in self.board.get_y_dim() and
                 self.board.board[coor[0]-1][coor[1]].get_hidden_state()):
                 self.clear_surrounding_squares([coor[0]-1,coor[1]], num_numbers)
 
@@ -491,7 +490,7 @@ class MineGame():
                 self.board.board[coor[0]][coor[1]+1].get_hidden_state()):
                 self.clear_surrounding_squares([coor[0],coor[1]+1], num_numbers)
 
-            #check middle bottom
+            #check  bottom
             if(coor[0]+1 in self.board.get_x_dim() and coor[1] in self.board.get_y_dim() and
                 self.board.board[coor[0]+1][coor[1]].get_hidden_state()):
                 self.clear_surrounding_squares([coor[0]+1,coor[1]], num_numbers)
@@ -554,7 +553,7 @@ class MineGame():
 
 if __name__ == '__main__':
     #rows, columns
-    game = MineGame(10,10, 2)
+    game = MineGame(10,10, 10)
 
     # game.run_game()
 
