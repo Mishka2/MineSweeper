@@ -1,3 +1,14 @@
+"""
+Author: Michelle Loven https://github.com/Mishka2/MineSweeper
+Date created: Augut 2, 2019
+Last edited: August 5, 2019
+
+Mine sweeper game!
+>>> *pip install keyboard*
+>>> sudo python mine_sweeper.py
+"""
+
+
 import random
 import os
 import keyboard
@@ -10,7 +21,7 @@ class Board():
         self.rows = rows
         self.columns = columns
         self.num_bombs = num_bombs
-        self.board = [] 
+        self.board = []
         self.board_win = False
         self.cursor = [0,0]
 
