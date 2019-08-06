@@ -8,12 +8,12 @@ Mine sweeper game!
 >>> sudo python mine_sweeper.py
 """
 
-
 import random
 import os
 import keyboard
 from colorama import Fore, Back, Style
 import time
+
 
 class Board():
 
@@ -34,13 +34,10 @@ class Board():
 
         for row_num in range(len(self.board)):
             for column_num in range(columns):
-                self.board[row_num].append(EmptyPiece())
-
-        # print("Bomb_coor: " + str(self.bombs))
+                self.board[row_num].append(TilePiece('empty'))
 
         for bomb_coor in self.bombs:
-            # print("board coor: " + str(self.board[0][0].get_char()))
-            self.board[bomb_coor[0]][bomb_coor[1]] = Bomb()
+            self.board[bomb_coor[0]][bomb_coor[1]] = TilePiece('bomb')
             self.set_num_pieces(self.board, bomb_coor)
 
     def get_board_win(self):
@@ -61,66 +58,23 @@ class Board():
         return y_arr
 
     def set_num_pieces(self, board, bomb):
-        #original = board[bomb[0]][bomb[1]]
-        # print("board coor: " + str(board[0][0]) + " coor: " + str([bomb[0]-1,bomb[1]-1]) + " In board? " + str([bomb[0]-1,bomb[1]-1] in board))
-        # print("HELLO")
-        if(bomb[0]-1 in self.get_x_dim() and bomb[1]-1 in self.get_y_dim() and board[bomb[0]-1][bomb[1]-1].get_name() != 'bomb'):
-            #top left
-            if board[bomb[0]-1][bomb[1]-1].get_name() != 'number':
-                board[bomb[0]-1][bomb[1]-1] = NumberPiece()
+        """
+        Checks every bomb and adds number pieces around each bomb coordinate
+        board: the board array
+        bomb: bomb coordinate
+        """
+        #direction_array = top left, middle top, top right, left, right, left bottom, middle bottom, right bottom
+        direction_array = [[-1,-1], [-1, 0], [-1, 1], [0,-1], [0,1], [1, -1], [1,0], [1,1]]
 
-            board[bomb[0]-1][bomb[1]-1].add_near_bomb()
+        for direction in direction_array:
+            x_dir = bomb[0] + direction[0]
+            y_dir = bomb[1] + direction[1]
 
-        if(bomb[0]-1 in self.get_x_dim() and bomb[1] in self.get_y_dim() and board[bomb[0]-1][bomb[1]].get_name() != 'bomb'):
-            #top mid
-            if board[bomb[0]-1][bomb[1]].get_name() != 'number':
-                board[bomb[0]-1][bomb[1]] = NumberPiece()
-
-            board[bomb[0]-1][bomb[1]].add_near_bomb()
-
-
-        if(bomb[0]-1 in self.get_x_dim() and bomb[1]+1 in self.get_y_dim() and board[bomb[0]-1][bomb[1]+1].get_name() != 'bomb'):
-            #top right
-            if board[bomb[0]-1][bomb[1]+1].get_name() != 'number':
-                board[bomb[0]-1][bomb[1]+1]= NumberPiece()
-
-            board[bomb[0]-1][bomb[1]+1].add_near_bomb()
-
-        if(bomb[0] in self.get_x_dim() and bomb[1]-1 in self.get_y_dim() and board[bomb[0]][bomb[1]-1].get_name() != 'bomb'):
-            #left
-            if board[bomb[0]][bomb[1]-1].get_name() != 'number':
-                board[bomb[0]][bomb[1]-1]= NumberPiece()
-
-            board[bomb[0]][bomb[1]-1].add_near_bomb()
-
-        if(bomb[0] in self.get_x_dim() and bomb[1]+1 in self.get_y_dim() and board[bomb[0]][bomb[1]+1].get_name() != 'bomb'):
-            #right
-            if board[bomb[0]][bomb[1]+1].get_name() != 'number':
-                board[bomb[0]][bomb[1]+1] = NumberPiece()
-
-            board[bomb[0]][bomb[1]+1].add_near_bomb()
-
-        if(bomb[0]+1 in self.get_x_dim() and bomb[1]-1 in self.get_y_dim() and board[bomb[0]+1][bomb[1]-1].get_name() != 'bomb'):
-            #bottom left
-            if board[bomb[0]+1][bomb[1]-1].get_name() != 'number':
-                board[bomb[0]+1][bomb[1]-1] = NumberPiece()
-
-            board[bomb[0]+1][bomb[1]-1].add_near_bomb()
-
-        if(bomb[0]+1 in self.get_x_dim() and bomb[1] in self.get_y_dim() and board[bomb[0]+1][bomb[1]].get_name() != 'bomb'):
-            #bottom mid
-            if board[bomb[0]+1][bomb[1]].get_name() != 'number':
-                board[bomb[0]+1][bomb[1]] = NumberPiece()
-
-            board[bomb[0]+1][bomb[1]].add_near_bomb()
-
-        if(bomb[0]+1 in self.get_x_dim() and bomb[1]+1 in self.get_y_dim() and board[bomb[0]+1][bomb[1]+1].get_name() != 'bomb'):
-            #bottom right
-            if board[bomb[0]+1][bomb[1]+1].get_name() != 'number':
-                board[bomb[0]+1][bomb[1]+1] = NumberPiece()
-
-            board[bomb[0]+1][bomb[1]+1].add_near_bomb()
-
+            if x_dir in self.get_x_dim() and y_dir in self.get_y_dim():
+                if board[x_dir][y_dir].get_name() != 'bomb':
+                    if board[x_dir][y_dir].get_name() != 'number':
+                        board[x_dir][y_dir] = TilePiece('number')
+                    board[x_dir][y_dir].add_near_bomb()
 
     def make_random_bombs(self, num):
         bombs = []
@@ -131,12 +85,9 @@ class Board():
             while repeat:
                 rand_x_num = random.randint(0,self.rows-1)
                 rand_y_num = random.randint(0,self.columns-1)
-
                 if not [rand_x_num, rand_y_num] in bombs:
                     repeat = False
-
             bombs.append([rand_x_num, rand_y_num])
-
         return bombs
 
     def set_color(self, item, end):
@@ -144,29 +95,23 @@ class Board():
             #if the cursor is not on the item
             if(item.get_flagged_state()):
                 print(Fore.RED + ' ' + str(item.get_hidden_name()) + ' ', end = end)
-                print(Style.RESET_ALL, end = '')
             elif(item.get_hidden_state()):
                 #if the item is hidden
                 print(Fore.BLUE + ' ' + str(item.get_hidden_name()) + ' ', end = end)
-                print(Style.RESET_ALL, end = '')
             else:
                 #if the item is not hidden
                 item.print_color()
                 print(' ' + str(item.get_hidden_name()) + ' ', end = end)
-                print(Style.RESET_ALL, end = '')
-
         else:
             #if the cursor is on the item
             if(item.get_flagged_state()):
-                print(Back.CYAN + Fore.RED + ' ' + str(item.get_hidden_name()) , end = end)
-                print(Style.RESET_ALL + ' ', end = '')
+                print(Back.CYAN + Fore.RED + ' ' + str(item.get_hidden_name()) +  ' ', end = end)
             elif(item.get_name() == 'bomb' and not item.get_hidden_state()):
                 print(Style.BRIGHT + Fore.RED + ' ' + str(item.get_hidden_name()) + ' ', end = end)
-                print(Style.RESET_ALL, end = '')
             else:
                 print(Back.CYAN + Fore.WHITE + Style.BRIGHT + ' ' + str(item.get_hidden_name()) + ' ' + Style.RESET_ALL, end = end)
-                print(Style.RESET_ALL, end = '')
 
+        print(Style.RESET_ALL, end = '')
 
         ###########FOR TESTING ONLY#################
         # if type(item.get_char())== int:
@@ -185,9 +130,6 @@ class Board():
         #     else:
         #         print(Back.CYAN + Fore.WHITE + Style.BRIGHT + ' ' + str(item.get_hidden_name()) + ' ' + Style.RESET_ALL, end = end)
 
-
-
-
     def display_board(self):
         count_not_bombs = 0
         os.system("clear")
@@ -198,7 +140,7 @@ class Board():
                     self.set_color(item,' ')
                 else:
                     self.set_color(item, None)
-                if( not item.get_hidden_state() and (item.get_name() == 'number' or item.get_name() == 'empty')):
+                if( not item.get_hidden_state() and (item.get_name() != 'bomb')):
                     count_not_bombs += 1
                 counter += 1
             print(' ')
@@ -207,7 +149,6 @@ class Board():
             self.board_win = True
 
         if self.display_rules:
-            # print(' ')
             print(Fore.GREEN + "Flag the " + Style.BRIGHT + Fore.RED +
                 str(len(self.bombs)) + Style.RESET_ALL + Fore.GREEN + " bombs with 'space'!")
 
@@ -222,80 +163,36 @@ class Board():
                         item.set_hidden_state(False)
                 counter += 1
 
-
     def apply_cursor(self, old_coor, new_coor):
         self.board[old_coor[0]][old_coor[1]].set_cursor_state(False)
         self.board[new_coor[0]][new_coor[1]].set_cursor_state(True)
 
-#
-class Bomb():
 
-    def __init__(self):
-        self.char = '\u203B'
-        self.cursor_state = False
-        self.flagged_state = False
-        self.hidden_state = True
-        self.name = "bomb"
-        self.display_name = '?'
-        self.previous_display_name = ''
+class TilePiece():
 
-    def get_flagged_state(self):
-        return self.flagged_state
-
-    def switch_flagged_state(self):
-        # print("previous: " + self.display_name)
-
-        self.flagged_state = not self.flagged_state
-        if(self.flagged_state):
-            self.previous_display_name = self.display_name
-            self.display_name = '\u2691'
-        else:
-            self.display_name = self.previous_display_name
-
-    def print_color(self):
-        print(Fore.RED, end = '')
-
-    def get_name(self):
-        return self.name
-
-    def set_hidden_state(self, bool):
-        self.hidden_state = bool
-
-    def get_hidden_state(self):
-        return self.hidden_state
-
-    def get_cursor_state(self):
-        return self.cursor_state
-
-    def set_cursor_state(self, state):
-        self.cursor_state = state
-
-    def get_char(self):
-        return self.char
-
-    def get_hidden_name(self):
-        return self.display_name
-
-    def set_display_name(self):
-        self.display_name = self.char
-
-class EmptyPiece():
-
-    def __init__(self):
-        self.char = '\u25A2'
+    def __init__(self, name):
+        self.char = ''
         # self.char = ' '
         self.cursor_state = False
         self.flagged_state = False
         self.hidden_state = True
-        self.name = "empty"
+        self.name = name
         self.display_name = '?'
+
+        self.set_char(name)
+
+    def set_char(self, name):
+        if name == 'empty':
+            self.char = '\u25A2'
+        elif name == 'bomb':
+            self.char = '\u203B'
+        elif name == 'number':
+            self.char = 0
 
     def get_flagged_state(self):
         return self.flagged_state
 
     def switch_flagged_state(self):
-        # print("previous: " + self.display_name)
-
         self.flagged_state = not self.flagged_state
         if(self.flagged_state):
             self.previous_display_name = self.display_name
@@ -307,81 +204,37 @@ class EmptyPiece():
         return self.name
 
     def print_color(self):
-        print(Fore.WHITE, end = '')
-
-    def get_hidden_state(self):
-        return self.hidden_state
-
-    def get_cursor_state(self):
-        return self.cursor_state
-
-    def get_char(self):
-        return self.char
-
-    def get_hidden_name(self):
-        return self.display_name
-
-    def set_display_name(self):
-        self.display_name = self.char
-
-    def set_hidden_state(self, bool):
-        self.hidden_state = bool
-
-    def set_cursor_state(self, state):
-        self.cursor_state = state
-
-class NumberPiece():
-
-    def __init__(self):
-        self.char = 0
-        self.name = "number"
-        self.cursor_state = False
-        self.flagged_state = False
-        self.hidden_state = True
-        self.display_name = '?'
-
-    def get_flagged_state(self):
-        return self.flagged_state
-
-    def switch_flagged_state(self):
-        # print("previous: " + self.display_name)
-
-        self.flagged_state = not self.flagged_state
-        if(self.flagged_state):
-            self.previous_display_name = self.display_name
-            self.display_name = '\u2691'
-        else:
-            self.display_name = self.previous_display_name
-
-    def get_name(self):
-        return self.name
-
-    def print_color(self):
-        print(Fore.GREEN, end = '')
-
-    def get_hidden_state(self):
-        return self.hidden_state
-
-    def set_hidden_state(self, bool):
-        self.hidden_state = bool
-
-    def get_cursor_state(self):
-        return self.cursor_state
-
-    def get_char(self):
-        return self.char
-
-    def set_cursor_state(self, state):
-        self.cursor_state = state
+        if self.name == 'empty':
+            print(Fore.WHITE, end = '')
+        elif self.name == 'bomb':
+            print(Fore.RED, end = '')
+        elif self.name == 'number':
+            print(Fore.GREEN, end = '')
 
     def add_near_bomb(self):
         self.char += 1
 
+    def get_hidden_state(self):
+        return self.hidden_state
+
+    def get_cursor_state(self):
+        return self.cursor_state
+
+    def get_char(self):
+        return self.char
+
     def get_hidden_name(self):
         return self.display_name
 
     def set_display_name(self):
         self.display_name = self.char
+        self.set_hidden_state(False)
+
+    def set_hidden_state(self, bool):
+        self.hidden_state = bool
+
+    def set_cursor_state(self, state):
+        self.cursor_state = state
 
 
 class MineGame():
@@ -393,7 +246,6 @@ class MineGame():
         self.board = Board(xdim,ydim, num_bombs)
         self.cursor_coor = [0,0]
 
-        self.moving_cursor = False
         self.lose = False
         self.win = False
         self.endgame = False
@@ -412,13 +264,11 @@ class MineGame():
         self.board.display_board()
         self.check_enter()
         self.check_win()
-        self.check_endgame()
-        self.board.display_board()
-
+        if(self.check_endgame()):
+            self.board.display_board()
 
     def check_win(self):
         self.win = self.board.get_board_win()
-        # print(self.win)
 
     def check_cursor_movement(self):
         arrows = ["up", "down", "left", "right", "r"]
@@ -427,9 +277,6 @@ class MineGame():
             pressed = keyboard.is_pressed(arrow)
             if pressed:
                 self.move_cursor(arrow)
-                self.moving_cursor = True
-            else:
-                self.moving_cursor = False
 
     def check_enter(self):
         coor = self.cursor_coor
@@ -445,11 +292,9 @@ class MineGame():
 
     def space_play(self, coor):
         self.board.board[coor[0]][coor[1]].switch_flagged_state()
-        # self.lose = True
 
     def enter_play(self, coor):
         self.board.board[coor[0]][coor[1]].set_display_name()
-        self.board.board[coor[0]][coor[1]].set_hidden_state(False)
 
         if (self.board.board[coor[0]][coor[1]].get_name() == 'bomb'):
             self.board.expose_board()
@@ -462,80 +307,37 @@ class MineGame():
         current_coordinate = self.board.board[coor[0]][coor[1]]
 
         if(current_coordinate.get_name() == 'empty' or
-            (current_coordinate.get_name() == 'number' and
-            num_numbers == 0)):
+            (current_coordinate.get_name() == 'number' and num_numbers == 0)):
 
             current_coordinate.set_display_name()
-            current_coordinate.set_hidden_state(False)
 
             if(current_coordinate.get_name() == 'number'):
                 num_numbers += 1
             if(current_coordinate.get_name() == 'empty'):
                 num_numbers = 0
 
-            ###CHECKING TOP, BOTTOM, LEFT, and RIGHT
+            ###CHECKING ALL DIRECTIONS
+            # all_dir = CHECKING TOP, LEFT, RIGHT, BOTTOM and then CHECKING DIAGONALS FOR NUMBERS ONLY
+            all_directions = [[-1,0],[0,-1],[0,1],[1,0],   [1,-1],[1,1],[-1,-1],[-1,1]]
 
-            #check top
-            if(coor[0]-1 in self.board.get_x_dim() and coor[1] in self.board.get_y_dim() and
-                self.board.board[coor[0]-1][coor[1]].get_hidden_state()):
-                self.clear_surrounding_squares([coor[0]-1,coor[1]], num_numbers)
-
-            #check left
-            if(coor[0] in self.board.get_x_dim() and coor[1]-1 in self.board.get_y_dim() and
-                self.board.board[coor[0]][coor[1]-1].get_hidden_state()):
-                self.clear_surrounding_squares([coor[0],coor[1]-1], num_numbers)
-
-            #check right
-            if(coor[0] in self.board.get_x_dim() and coor[1]+1 in self.board.get_y_dim() and
-                self.board.board[coor[0]][coor[1]+1].get_hidden_state()):
-                self.clear_surrounding_squares([coor[0],coor[1]+1], num_numbers)
-
-            #check  bottom
-            if(coor[0]+1 in self.board.get_x_dim() and coor[1] in self.board.get_y_dim() and
-                self.board.board[coor[0]+1][coor[1]].get_hidden_state()):
-                self.clear_surrounding_squares([coor[0]+1,coor[1]], num_numbers)
-
-
-            ###CHECKING DIAGONALS FOR NUMBERS ONLY
-            if(self.board.board[coor[0]][coor[1]].get_name() == 'empty'):
-                #check left bottom
-                if(coor[0]+1 in self.board.get_x_dim() and coor[1]-1 in self.board.get_y_dim() and
-                    self.board.board[coor[0]+1][coor[1]-1].get_name() == 'number'):
-
-                    self.board.board[coor[0]+1][coor[1]-1].set_display_name()
-                    self.board.board[coor[0]+1][coor[1]-1].set_hidden_state(False)
-
-                #check right bottom
-                if(coor[0]+1 in self.board.get_x_dim() and coor[1]+1 in self.board.get_y_dim() and
-                    self.board.board[coor[0]+1][coor[1]+1].get_name() == 'number'):
-
-                    self.board.board[coor[0]+1][coor[1]+1].set_display_name()
-                    self.board.board[coor[0]+1][coor[1]+1].set_hidden_state(False)
-
-                #check top left
-                if(coor[0]-1 in self.board.get_x_dim() and coor[1]-1 in self.board.get_y_dim() and
-                    self.board.board[coor[0]-1][coor[1]-1].get_name() == 'number'):
-
-                    self.board.board[coor[0]-1][coor[1]-1].set_display_name()
-                    self.board.board[coor[0]-1][coor[1]-1].set_hidden_state(False)
-
-                #check top right
-                if(coor[0]-1 in self.board.get_x_dim() and coor[1]+1 in self.board.get_y_dim() and
-                    self.board.board[coor[0]-1][coor[1]+1].get_name() == 'number'):
-
-                    self.board.board[coor[0]-1][coor[1]+1].set_display_name()
-                    self.board.board[coor[0]-1][coor[1]+1].set_hidden_state(False)
-
+            for direction in all_directions:
+                x_coor = coor[0] + direction[0]
+                y_coor = coor[1] + direction[1]
+                if(x_coor in self.board.get_x_dim() and y_coor in self.board.get_y_dim()):
+                    if(direction in all_directions[:4] and self.board.board[x_coor][y_coor].get_hidden_state()):
+                        self.clear_surrounding_squares([x_coor,y_coor], num_numbers)
+                    elif(self.board.board[x_coor][y_coor].get_name() == 'number'):
+                        self.board.board[x_coor][y_coor].set_display_name()
 
     def add_to_cursor(self, points):
         #if the cursor CAN move there
         old_cursor_coor = [self.cursor_coor[0],self.cursor_coor[1]]
-        above = self.cursor_coor[0] + points[0]
-        side = self.cursor_coor[1] + points[1]
-        if( (0 <= above and above < self.rows) and (0 <= side and side < self.columns)):
-            self.cursor_coor[0] += points[0]
-            self.cursor_coor[1] += points[1]
-            new_cursor_coor = [self.cursor_coor[0],self.cursor_coor[1]]
+        next_x = self.cursor_coor[0] + points[0]
+        next_y = self.cursor_coor[1] + points[1]
+        if( next_x in self.board.get_x_dim() and next_y in self.board.get_y_dim()):
+            self.cursor_coor[0] = next_x
+            self.cursor_coor[1] = next_y
+            new_cursor_coor = self.cursor_coor
 
             self.board.apply_cursor(old_cursor_coor,new_cursor_coor)
 
@@ -550,12 +352,9 @@ class MineGame():
             self.add_to_cursor([0,-1])
 
 
-
 if __name__ == '__main__':
-    #rows, columns
+    #rows, columns, number of bombs
     game = MineGame(10,10, 10)
-
-    # game.run_game()
 
     while(not game.check_endgame()):
         game.run_game()
