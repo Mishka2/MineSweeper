@@ -10,7 +10,7 @@ class Board():
         self.rows = rows
         self.columns = columns
         self.num_bombs = num_bombs
-        self.board = []
+        self.board = [] 
         self.board_win = False
         self.cursor = [0,0]
 
