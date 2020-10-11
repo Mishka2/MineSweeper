@@ -2,11 +2,11 @@
 
 This is how the game looks:
 <br />
-<div style="align:center"><img src="https://github.com/Mishka2/mine_sweeper/blob/master/UI/mine1.png" /></div>
+<div><img src="https://github.com/Mishka2/mine_sweeper/blob/master/UI/mine1.png" width="500"/></div>
 <br />
 This is game play! You can lay flags!
 <br />
-<div style="align:center"><img src="https://github.com/Mishka2/mine_sweeper/blob/master/UI/mine2.png" /></div>
+<div><img src="https://github.com/Mishka2/mine_sweeper/blob/master/UI/mine2.png" width="500" /></div>
 <br />
 Installations:
 <br />
